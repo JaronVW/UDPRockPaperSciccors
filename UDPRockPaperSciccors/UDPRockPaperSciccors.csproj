@@ -5,6 +5,8 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>UDPRockPaperScissors</AssemblyName>
+        <RootNamespace>UDPRockPaperScissors</RootNamespace>
     </PropertyGroup>
 
 </Project>

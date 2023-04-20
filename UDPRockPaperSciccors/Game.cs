@@ -22,7 +22,7 @@ public class Game
 
     public Game(string localSocket, string opponentSocket)
     {
-        if (isValidSocket(localSocket) && isValidSocket(opponentSocket))
+        if (IsValidSocket(localSocket) && IsValidSocket(opponentSocket))
         {
             _localSocket = localSocket;
             _opponentSocket = opponentSocket;
@@ -43,7 +43,7 @@ public class Game
         Listener();
     }
 
-    private bool isValidSocket(string socket)
+    private bool IsValidSocket(string socket)
     {
         return socket.Split(':').Length == 2;
     }
@@ -52,6 +52,24 @@ public class Game
     {
         var data = Encoding.ASCII.GetBytes(message);
         _client.Send(data, data.Length, _opponentIP, _opponentPort);
+    }
+
+    public string getGuesWithinTenSeconds()
+    {
+        Console.Write("Enter your guess within ten seconds rock,paper,scissors (enter quit to stop) : ");
+
+        var guess = "";
+        var startTime = DateTime.Now;
+        while (string.IsNullOrEmpty(guess) && (DateTime.Now - startTime).TotalSeconds < 10)
+        {
+            guess = Console.ReadLine();
+        }
+        if (ValidateInput(guess!))
+        {
+            return guess!;
+        }
+        Console.WriteLine("Invalid input");
+        return getGuesWithinTenSeconds();
     }
 
 
@@ -72,14 +90,17 @@ public class Game
             }
         }
     }
-    
-    // public bool validateInput(string input)
-    // {
-    //     switch (input)
-    //     {
-    //         
-    //     }
-    //    
-    // }
 
+    private bool ValidateInput(string input)
+    {
+        input = input.ToLower();
+        return input switch
+        {
+            "rock" => true,
+            "paper" => true,
+            "scissors" => true,
+            "quit" => true,
+            _ => false
+        };
+    }
 }
