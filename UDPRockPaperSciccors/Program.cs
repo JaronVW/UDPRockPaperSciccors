@@ -20,15 +20,14 @@ public static class Program
                 Console.Write("Make sure both players are connected then press enter to start the game");
                 Console.ReadLine();
                 Console.Write("You have ten seconds to enter your guess (rock, paper, scissors): ");
-
-                // game.SetSendTimer();
+                
                 var answer = Reader.ReadLine(10000);
                 if (answer == null) throw new Exception("Invalid input");
                 game.Send(answer);
                 game.Listener();
                 Console.WriteLine(answer);
                 Console.WriteLine(game.Response);
-                Console.WriteLine(game.beats(answer, game.Response));
+                Console.WriteLine(game.Beats(answer, game.Response));
 
                 game.unSet();
             }

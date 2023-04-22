@@ -53,11 +53,6 @@ public class Game
         return socket.Split(':').Length == 2 && Regex.Match(socket, SocketRegex).Success;
     }
 
-    public void SetSendTimer()
-    {
-        _client.Client.SendTimeout = 10;
-    }
-
     public void Send(string message)
     {
         try
@@ -72,13 +67,11 @@ public class Game
             Console.WriteLine(e);
             throw;
         }
-        
     }
 
 
     public void Listener()
     {
-        _client.Client.SendTimeout = 10;
         while (Response == null)
         {
             // receive bytes
@@ -106,9 +99,15 @@ public class Game
         };
     }
 
-    public string beats(string first, string second)
+
+    public string Beats(string me, string opponent)
     {
-        int firstInt = first switch
+        if (!ValidateInput(me) || !ValidateInput(opponent)) throw new Exception("Invalid input");
+
+        me = me.ToLower();
+        opponent = opponent.ToLower();
+
+        var myGuess = me switch
         {
             "rock" => 1,
             "paper" => 2,
@@ -116,7 +115,7 @@ public class Game
             _ => 0
         };
 
-        int secondInt = second switch
+        var opponentGuess = opponent switch
         {
             "rock" => 1,
             "paper" => 2,
@@ -124,12 +123,21 @@ public class Game
             _ => 0
         };
 
-        if ((firstInt) % 3 + 1 == secondInt)
-            return "Win";
-        else if ((firstInt) % 3 + 1 == secondInt)
-            return "Lose";
-        else
+        if (myGuess == opponentGuess)
             return "Draw";
+
+        else switch (myGuess)
+        {
+            case 1 when opponentGuess == 2:
+            case 2 when opponentGuess == 3:
+            case 3 when opponentGuess == 1:
+                return "Lose";
+            case 1 when opponentGuess == 3:
+            case 2 when opponentGuess == 1:
+                return "Win";
+            default:
+                return "Lose";
+        }
     }
 
     public void unSet()

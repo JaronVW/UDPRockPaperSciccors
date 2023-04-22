@@ -8,8 +8,10 @@ class Reader {
     static Reader() {
         getInput = new AutoResetEvent(false);
         gotInput = new AutoResetEvent(false);
-        inputThread = new Thread(reader);
-        inputThread.IsBackground = true;
+        inputThread = new Thread(reader)
+        {
+            IsBackground = true
+        };
         inputThread.Start();
     }
 
@@ -24,7 +26,7 @@ class Reader {
     // omit the parameter to read a line without a timeout
     public static string ReadLine(int timeOutMillisecs = Timeout.Infinite) {
         getInput.Set();
-        bool success = gotInput.WaitOne(timeOutMillisecs);
+        var success = gotInput.WaitOne(timeOutMillisecs);
         if (success)
             return input;
         else
