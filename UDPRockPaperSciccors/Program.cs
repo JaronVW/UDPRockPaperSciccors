@@ -1,4 +1,7 @@
-﻿using UDPTicTacToe;
+﻿using System.Net.Sockets;
+using UDPTicTacToe;
+
+namespace UDPRockPaperScissors;
 
 public static class Program
 {
@@ -17,18 +20,21 @@ public static class Program
                 Console.Write("Make sure both players are connected then press enter to start the game");
                 Console.ReadLine();
                 Console.Write("You have ten seconds to enter your guess (rock, paper, scissors): ");
-                game.setSendTimer();
-                var answer = Console.ReadLine();
+
+                // game.SetSendTimer();
+                var answer = Reader.ReadLine(10000);
                 if (answer == null) throw new Exception("Invalid input");
                 game.Send(answer);
                 game.Listener();
                 Console.WriteLine(answer);
                 Console.WriteLine(game.Response);
                 Console.WriteLine(game.beats(answer, game.Response));
+
+                game.unSet();
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e);
             }
         }
     }

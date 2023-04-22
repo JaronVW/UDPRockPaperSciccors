@@ -53,22 +53,32 @@ public class Game
         return socket.Split(':').Length == 2 && Regex.Match(socket, SocketRegex).Success;
     }
 
-    public void setSendTimer()
+    public void SetSendTimer()
     {
-        _client.Client.SendTimeout = 10000;
+        _client.Client.SendTimeout = 10;
     }
 
     public void Send(string message)
     {
-        if (!ValidateInput(message)) throw new Exception("Invalid input");
+        try
+        {
+            if (!ValidateInput(message)) throw new Exception("Invalid input");
 
-        var data = Encoding.ASCII.GetBytes(message);
-        _client.Send(data, data.Length, _opponentIp, _opponentPort);
+            var data = Encoding.ASCII.GetBytes(message);
+            _client.Send(data, data.Length, _opponentIp, _opponentPort);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
     }
 
 
     public void Listener()
     {
+        _client.Client.SendTimeout = 10;
         while (Response == null)
         {
             // receive bytes
@@ -76,11 +86,9 @@ public class Game
             // convert bytes to string
             var returnData = Encoding.ASCII.GetString(receiveBytes);
             // set string response 
-            if (returnData.Length > 0)
-            {
-                Response = returnData;
-                break;
-            }
+            if (returnData.Length <= 0) continue;
+            Response = returnData;
+            break;
         }
 
         Response = Response.Length > 0 ? Response.ToLower() : "timeout";
@@ -122,5 +130,10 @@ public class Game
             return "Lose";
         else
             return "Draw";
+    }
+
+    public void unSet()
+    {
+        _client.Close();
     }
 }
