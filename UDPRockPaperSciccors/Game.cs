@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace UDPTicTacToe;
 
@@ -9,15 +11,19 @@ public class Game
     private string _localSocket;
     private string _opponentSocket;
 
-    private string _localIP;
-    private string _opponentIP;
+    private string _localIp;
+    private string _opponentIp;
 
     private int _localPort;
     private int _opponentPort;
 
     private UdpClient _client;
-    private IPEndPoint _localIPEndPoint;
-    private IPEndPoint _opponentIPEndPoint;
+    private IPEndPoint _localIpEndPoint;
+    private IPEndPoint _opponentIpEndPoint;
+
+    private const string SocketRegex = @"^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}:([0-9]{1,5})$";
+
+    public string? Response;
 
 
     public Game(string localSocket, string opponentSocket)
@@ -26,8 +32,8 @@ public class Game
         {
             _localSocket = localSocket;
             _opponentSocket = opponentSocket;
-            _localIP = _localSocket.Split(':')[0];
-            _opponentIP = _opponentSocket.Split(':')[0];
+            _localIp = _localSocket.Split(':')[0];
+            _opponentIp = _opponentSocket.Split(':')[0];
 
             _localPort = int.Parse(_localSocket.Split(':')[1]);
             _opponentPort = int.Parse(_opponentSocket.Split(':')[1]);
@@ -38,57 +44,46 @@ public class Game
         }
 
         _client = new UdpClient(_localPort);
-        _localIPEndPoint = new IPEndPoint(IPAddress.Parse(_localIP), _localPort);
-        _opponentIPEndPoint = new IPEndPoint(IPAddress.Parse(_opponentIP), _opponentPort);
-        Listener();
+        _localIpEndPoint = new IPEndPoint(IPAddress.Parse(_localIp), _localPort);
+        _opponentIpEndPoint = new IPEndPoint(IPAddress.Parse(_opponentIp), _opponentPort);
     }
 
     private bool IsValidSocket(string socket)
     {
-        return socket.Split(':').Length == 2;
+        return socket.Split(':').Length == 2 && Regex.Match(socket, SocketRegex).Success;
+    }
+
+    public void setSendTimer()
+    {
+        _client.Client.SendTimeout = 10000;
     }
 
     public void Send(string message)
     {
+        if (!ValidateInput(message)) throw new Exception("Invalid input");
+
         var data = Encoding.ASCII.GetBytes(message);
-        _client.Send(data, data.Length, _opponentIP, _opponentPort);
-    }
-
-    public string getGuesWithinTenSeconds()
-    {
-        Console.Write("Enter your guess within ten seconds rock,paper,scissors (enter quit to stop) : ");
-
-        var guess = "";
-        var startTime = DateTime.Now;
-        while (string.IsNullOrEmpty(guess) && (DateTime.Now - startTime).TotalSeconds < 10)
-        {
-            guess = Console.ReadLine();
-        }
-        if (ValidateInput(guess!))
-        {
-            return guess!;
-        }
-        Console.WriteLine("Invalid input");
-        return getGuesWithinTenSeconds();
+        _client.Send(data, data.Length, _opponentIp, _opponentPort);
     }
 
 
-    private void Listener()
+    public void Listener()
     {
-        while (true)
+        while (Response == null)
         {
-            while (true)
+            // receive bytes
+            var receiveBytes = _client.Receive(ref _opponentIpEndPoint);
+            // convert bytes to string
+            var returnData = Encoding.ASCII.GetString(receiveBytes);
+            // set string response 
+            if (returnData.Length > 0)
             {
-                // receive bytes
-                var receiveBytes = _client.Receive(ref _opponentIPEndPoint);
-
-                // convert bytes to string
-                var returnData = Encoding.ASCII.GetString(receiveBytes);
-
-                // print string
-                Console.WriteLine(returnData);
+                Response = returnData;
+                break;
             }
         }
+
+        Response = Response.Length > 0 ? Response.ToLower() : "timeout";
     }
 
     private bool ValidateInput(string input)
@@ -99,8 +94,33 @@ public class Game
             "rock" => true,
             "paper" => true,
             "scissors" => true,
-            "quit" => true,
             _ => false
         };
+    }
+
+    public string beats(string first, string second)
+    {
+        int firstInt = first switch
+        {
+            "rock" => 1,
+            "paper" => 2,
+            "scissors" => 3,
+            _ => 0
+        };
+
+        int secondInt = second switch
+        {
+            "rock" => 1,
+            "paper" => 2,
+            "scissors" => 3,
+            _ => 0
+        };
+
+        if ((firstInt) % 3 + 1 == secondInt)
+            return "Win";
+        else if ((firstInt) % 3 + 1 == secondInt)
+            return "Lose";
+        else
+            return "Draw";
     }
 }
