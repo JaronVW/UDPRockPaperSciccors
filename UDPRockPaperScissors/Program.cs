@@ -1,6 +1,4 @@
-﻿using System.Net.Sockets;
-using UDPTicTacToe;
-
+﻿
 namespace UDPRockPaperScissors;
 
 public static class Program
@@ -27,9 +25,8 @@ public static class Program
                 game.Listener();
                 Console.WriteLine(answer);
                 Console.WriteLine(game.Response);
-                Console.WriteLine(game.Beats(answer, game.Response));
-
-                game.unSet();
+                if (game.Response != null) Console.WriteLine(game.Beats(answer, game.Response));
+                game.UnSet();
             }
             catch (Exception e)
             {

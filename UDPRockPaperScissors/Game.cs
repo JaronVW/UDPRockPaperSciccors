@@ -1,23 +1,16 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace UDPTicTacToe;
+namespace UDPRockPaperScissors;
 
 public class Game
 {
-    private string _localSocket;
-    private string _opponentSocket;
+    private readonly string _opponentIp;
+    private readonly int _opponentPort;
 
-    private string _localIp;
-    private string _opponentIp;
-
-    private int _localPort;
-    private int _opponentPort;
-
-    private UdpClient _client;
+    private readonly UdpClient _client;
     private IPEndPoint _localIpEndPoint;
     private IPEndPoint _opponentIpEndPoint;
 
@@ -28,27 +21,27 @@ public class Game
 
     public Game(string localSocket, string opponentSocket)
     {
+        int localPort;
+        string localIp;
         if (IsValidSocket(localSocket) && IsValidSocket(opponentSocket))
         {
-            _localSocket = localSocket;
-            _opponentSocket = opponentSocket;
-            _localIp = _localSocket.Split(':')[0];
-            _opponentIp = _opponentSocket.Split(':')[0];
+            localIp = localSocket.Split(':')[0];
+            _opponentIp = opponentSocket.Split(':')[0];
 
-            _localPort = int.Parse(_localSocket.Split(':')[1]);
-            _opponentPort = int.Parse(_opponentSocket.Split(':')[1]);
+            localPort = int.Parse(localSocket.Split(':')[1]);
+            _opponentPort = int.Parse(opponentSocket.Split(':')[1]);
         }
         else
         {
             throw new Exception("Invalid socket");
         }
 
-        _client = new UdpClient(_localPort);
-        _localIpEndPoint = new IPEndPoint(IPAddress.Parse(_localIp), _localPort);
+        _client = new UdpClient(localPort);
+        _localIpEndPoint = new IPEndPoint(IPAddress.Parse(localIp), localPort);
         _opponentIpEndPoint = new IPEndPoint(IPAddress.Parse(_opponentIp), _opponentPort);
     }
 
-    private bool IsValidSocket(string socket)
+    private static bool IsValidSocket(string socket)
     {
         return socket.Split(':').Length == 2 && Regex.Match(socket, SocketRegex).Success;
     }
@@ -87,7 +80,7 @@ public class Game
         Response = Response.Length > 0 ? Response.ToLower() : "timeout";
     }
 
-    private bool ValidateInput(string input)
+    private static bool ValidateInput(string input)
     {
         input = input.ToLower();
         return input switch
@@ -126,7 +119,7 @@ public class Game
         if (myGuess == opponentGuess)
             return "Draw";
 
-        else switch (myGuess)
+        switch (myGuess)
         {
             case 1 when opponentGuess == 2:
             case 2 when opponentGuess == 3:
@@ -140,7 +133,7 @@ public class Game
         }
     }
 
-    public void unSet()
+    public void UnSet()
     {
         _client.Close();
     }
