@@ -46,12 +46,11 @@ public class Game
         return socket.Split(':').Length == 2 && Regex.Match(socket, SocketRegex).Success;
     }
 
-    public void Send(string message)
+    public void Send(string? message)
     {
         try
         {
             if (!ValidateInput(message)) throw new Exception("Invalid input");
-
             var data = Encoding.ASCII.GetBytes(message);
             _client.Send(data, data.Length, _opponentIp, _opponentPort);
         }
@@ -80,7 +79,7 @@ public class Game
         Response = Response.Length > 0 ? Response.ToLower() : "timeout";
     }
 
-    private static bool ValidateInput(string input)
+    private static bool ValidateInput(string? input)
     {
         input = input.ToLower();
         return input switch
@@ -93,7 +92,7 @@ public class Game
     }
 
 
-    public string Beats(string me, string opponent)
+    public static string Beats(string? me, string? opponent)
     {
         if (!ValidateInput(me) || !ValidateInput(opponent)) throw new Exception("Invalid input");
 
