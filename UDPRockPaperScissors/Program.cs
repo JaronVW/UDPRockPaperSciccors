@@ -55,14 +55,17 @@ public static class Program
                         Console.WriteLine("Draw!");
                         Console.ResetColor();
                         break;
+                    case "timeout":
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Your opponent chickened out, you win!");
+                        Console.ResetColor();
+                        break;
                     default:
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("You win?, we don't know honestly");
                         Console.ResetColor();
                         break;
                 }
-
-                if (game.Response == "timeout") Console.WriteLine("Your opponent chickened out, you win!");
                 game.UnSet();
                 Console.WriteLine("Press enter to play again, type exit to exit");
                 exit = Console.ReadLine();
